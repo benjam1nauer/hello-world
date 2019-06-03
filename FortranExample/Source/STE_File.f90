@@ -1,0 +1,138 @@
+!> \brief Liest einfache Steuerdateien ein und Speichert diese in STE_data
+!!
+MODULE STE_file
+
+USE Datatypes
+USE fIO_fileIO
+
+IMPLICIT NONE
+
+PRIVATE
+
+PUBLIC :: STE_data
+PUBLIC :: STE_load
+PUBLIC :: getFilenameGear ! Wird nur einmal als Beispiel genutzt
+
+!> \\brief Speichert die Daten der Steuerdatei
+TYPE :: STE_data
+  ! Schoenes programmieren wuerde hier ein PRIVATE beinhalten,
+  !   allerdings kann man dann nur noch ueber get und set Methoden
+  !   auf die Daten zugreifen. Siehe getFilenameGear(this)
+  CHARACTER(char_norm) :: filenameGear      = ' '
+  CHARACTER(char_norm) :: filenameTool      = ' '
+  CHARACTER(char_norm) :: filenameKinematic = ' '
+  INTEGER              :: noIncrements      = 0
+  REAL(real_norm)      :: startPosition     = 0
+  REAL(real_norm)      :: endPosition       = 0
+  REAL(real_norm)      :: centerDistance    = 0
+  REAL(real_norm)      :: pitchDia          = 0
+  INTEGER              :: processType       = 0
+END TYPE STE_data
+
+INTERFACE STE_load
+  MODULE PROCEDURE loadSTEFile
+END INTERFACE STE_load
+
+CONTAINS
+
+  !> \\brief Methode um den Dateinamen zurueck zu geben. Wenn ausschließlich ueber solche
+  !          Funktionen auf Daten zugegriffen werden, ist die Datenstruktur unabhaengig
+  !          vom restlichen Programcode. Aber es ist deutlich mehr zu programmieren.
+  ELEMENTAL FUNCTION getFilenameGear(this) RESULT(value)
+    TYPE(STE_data), INTENT(IN) :: this
+    CHARACTER(char_norm) :: value
+    value = this%filenameGear
+  END FUNCTION getFilenameGear
+
+  !> \brief Laden einer Steuerdatei
+  !!
+  SUBROUTINE loadSTEFile(this, filename, ierr)
+    TYPE(STE_data), INTENT(INOUT) :: this
+    ! Mit Sternchen ist die Laenge des Strings flexibel
+    CHARACTER(len=*), INTENT(IN) :: filename
+    INTEGER, INTENT(OUT) :: ierr
+    ! Man muss eine Laenge angeben, da sonst nur eine Laenge von 1 genutzt wird
+    CHARACTER(char_norm), DIMENSION(:), ALLOCATABLE :: dataArray
+    INTEGER :: iLine
+    INTEGER :: key
+    REAL(real_norm) :: valueReal
+    INTEGER :: valueInt
+    CHARACTER(char_norm) :: valueChar
+
+    ! INTENT(OUT) Variablen muessen unbedingt vorbesetzt werden, aber generell sollte
+    !   dies bei allen Variablen gemacht werden.
+    ierr = 0
+    ! Daten in ein CHARACTER Array laden
+    CALL fIO_load(dataArray, filename, ierr)
+    IF (ierr /= 0) RETURN
+
+    ! Das Array komplett durchlaufen und die Zeilen analysieren. Man kann Schleifen auch
+    !   Namen geben, so wurde es hier bei readFile gemacht. Kann es etwas uebersichtlicher gestalten.
+    readFile: DO iLine = 1, SIZE(dataArray)
+      ! Die aktuelle Zeile der Steurdatei wird analysiert
+      CALL analyzeLine(dataArray(iLine), key, valueReal, valueInt, valueChar)
+      ! Statt vieler IF ... ELSE IF ... Abfragen lieber eine SELECT CASE
+      SELECT CASE (key)
+        ! Fuer jede einzulesende Avriable muss hier ein CASE eingefuegt werden
+        !   Die Kenner stehen alle in http://wzl-vcs/tools/wiki/gt/Fortran/SteuerdateiKennziffern
+        CASE(0002)
+          this%processType = valueInt
+        CASE(1000)
+          this%fileNameGear = valueChar
+        CASE(1115)
+          this%pitchDia = valueReal
+        CASE(2000)
+          this%fileNameTool = valueChar
+        CASE(3000)
+          this%fileNameKinematic = valueChar
+        CASE(3008)
+          this%startPosition = valueReal
+        CASE(3009)
+          this%endPosition = valueReal
+        CASE(3012)
+          this%noIncrements = valueInt
+        CASE(3034)
+          this%centerDistance = valueReal
+        CASE DEFAULT
+          ! Wenn keine der oberen vorkommen
+          CONTINUE
+      END SELECT
+    END DO readFile
+  END SUBROUTINE loadSTEFile
+
+  !> \\brief Liest eine Zeile in der Steuerdatei und gibt den Schluessel
+  !          sowie den Wert als Real, Integer und String zurueck
+  SUBROUTINE analyzeLine(line, key, valueReal, valueInt, valueChar)
+    CHARACTER(LEN=*), INTENT(INOUT) :: line
+    INTEGER, INTENT(OUT) :: key
+    REAL(real_norm), INTENT(OUT) :: valueReal
+    INTEGER, INTENT(OUT) :: valueInt
+    CHARACTER(char_norm), INTENT(OUT) :: valueChar
+    INTEGER :: endLine, ierr
+
+    key = 0
+    valueReal = 0.0D0
+    valueInt = 0
+    valueChar = ' '
+
+    ! Leerzeichen am anfang entfernen
+    line = ADJUSTL(line)
+    ! Wenn zwei ** am Anfang ist es ein Kommentar
+    IF (line(1:2) == '**') RETURN
+    ! Die Schluessel starten immer mit * und dann vier Ziffern
+    READ(line(2:5),*, IOSTAT=ierr) key
+    ! Startposition eines moeglichen Kommentars in der aktuellen Zeile
+    endLine = INDEX(line,'**')-1
+    ! kein Kommentar vorhanden => setze endLine = Ort nach dem letzten Buchstaben
+    IF (endLine == -1) endLine = LEN_TRIM(line) + 1
+    ! Nutzt die "Internal I/O" von Fortran um den String auf verschiedene Datentypen abzuspeichern
+    READ(line(6:endLine),*, IOSTAT=ierr) valueReal
+    valueInt = INT(valueReal)
+    READ(line(6:endLine),'(A)', IOSTAT=ierr) valueChar
+    valueChar = TRIM(ADJUSTL(valueChar))
+    ! Ueberpruefen ob Anfuehrungszeichen genutzt wurden, wenn ja entfernen
+    IF (valueChar(1:1) == '"' .OR. valueChar(1:1) == "'") valueChar = valueChar(2:LEN_TRIM(valueChar)-1)
+    valueChar = TRIM(ADJUSTL(valueChar))
+  END SUBROUTINE analyzeLine
+
+END MODULE STE_file

@@ -1,0 +1,10 @@
+call "c:/Program Files (x86)/IntelSWTools/compilers_and_libraries/windows/bin/ifortvars.bat" ia32
+
+set PATH="c:/Program Files/CMake/bin";%PATH%
+set PATH=c:/cygwin/bin;%PATH%
+
+set WZL_INSTALL_BASE=v:/install
+
+set CC=cl
+set CXX=cl
+set FC=ifort

@@ -1,0 +1,209 @@
+!> \brief Alles was man braucht um Daten aus oder in eine Datei zu schreiben
+!!
+MODULE fIO_FileIO
+
+USE Datatypes
+USE Vector
+
+IMPLICIT NONE
+
+PRIVATE
+
+PUBLIC :: fIO_load
+PUBLIC :: fIO_getNoCols
+PUBLIC :: fIO_write
+
+!> \\brief Verschiedene Dateien einlesen
+INTERFACE fIO_load
+  MODULE PROCEDURE loadLineFromTXT
+  MODULE PROCEDURE loadCHARFromTXT
+END INTERFACE fIO_load
+
+!> \\brief Verschiedene Datentypen schreiben
+INTERFACE fIO_write
+  MODULE PROCEDURE writeLine4ToTXT
+END INTERFACE fIO_write
+
+!> \\brief Bestimmt die Anzahl Spalten in einer Zeile
+INTERFACE fIO_getNoCols
+  MODULE PROCEDURE getNoCols
+END INTERFACE fIO_getNoCols
+
+CONTAINS
+  
+  !> \brief Laden einer Kontur aus einer txt-Datei
+  !!
+  SUBROUTINE loadLineFromTXT(line, filename, ierr)
+    ! Mit Sternchen ist die Laenge des Strings flexibel
+    CHARACTER(len=*), INTENT(IN) :: filename
+    TYPE(line4), INTENT(OUT) :: line
+    INTEGER, INTENT(OUT) :: ierr
+    INTEGER :: fID, nLines, i, nCols
+    REAL(real_norm), DIMENSION(:,:), ALLOCATABLE :: p, n
+    CHARACTER(char_norm) :: str
+    
+    ierr = 0
+    
+    ! fID ist der File Identifier. Beim oeffnen einer Datei ist es wichtig, dass man
+    !   einen eindeutigen und einmaligen Identifier benutzt. Hierzu gibt es in den
+    !   GT-FortranBibliotheken die Function Get_Unit_Number, welche ich hier nicht
+    !   nachprogrammieren wollte.
+    fID = 435
+    ! Anzahl Zeilen und damit Anzahl Punkte
+    nLines = getNoRows(filename)
+    ! Pruefen ob Daten in der Datei waren
+    IF (nLines == 0) THEN
+      ierr = 1
+      RETURN
+    END IF
+    ! Speicher fuer die Line allokieren
+    CALL allocateLine(line, nLines)
+    ALLOCATE(p(nLines,3),n(nLines,3))
+    p = 0
+    n = 0
+    
+    OPEN(fId, FILE=TRIM(filename), IOSTAT=ierr, ACTION='READ')
+    ! REWIND ist eigentlich nicht notwendig, aber aus irgendeinem Grund brauche ich das hier
+    REWIND(fId, IOSTAT=ierr)
+    READ(fId,'(A)',IOSTAT=ierr) str
+    nCols = getNoCols(str, ' ')
+    REWIND(fId, IOSTAT=ierr)
+    
+    ! Wenn beim Oeffnen ein Fehler aufgetreten ist, dann Abbruch und zurueck zum Aufruf der Funktion
+    IF (ierr /= 0) RETURN
+    
+    ! Der Sternchen Format Identifier erlaubt das listengesteuerte Einlesen von REAL Werten
+    !   Wenn drei Spalten in der Datei stehen werden nur die Punkte belegt, bei sechs Spalten auch die
+    !   Normalen. Dabei wird auf eine Schleife verzichtet und direkt ueber das Array geloopt
+    IF (nCols == 3) THEN
+      READ(fId,*,IOSTAT=ierr) (p(i,1), p(i,2), p(i,3), i=1, nLines)
+    ELSEIF (nCols == 6) THEN
+      READ(fId,*,IOSTAT=ierr) (p(i,1), p(i,2), p(i,3), n(i,1), n(i,2), n(i,3), i=1, nLines)
+      ! Man haette auch direkt in die Struktur lesen koennen line%normals(i)%v4(1),
+      !   aber dann haette ich kein Beispiel fuer dynmaisches allokieren gehabt :D
+      line%normals(:)%v4(1) = n(:,1)
+      line%normals(:)%v4(2) = n(:,2)
+      line%normals(:)%v4(3) = n(:,3)
+    END IF
+    line%points(:)%v4(1) = p(:,1)
+    line%points(:)%v4(2) = p(:,2)
+    line%points(:)%v4(3) = p(:,3)
+    ! Allokierter Speicher muss auch manuell wieder freigegeben werden. Fortran hat keinen garbage collector!
+    !   Bei Nichtbeachten hat man sehr schnell einen memory leak und dafuer keinen Arbeitsspeicher mehr.
+    !   Felder welche direkt beim deklarieren eine Groesse bekommen, werden am Ende der Routine/Funktion
+    !   automatsich freigegeben (ausser man verwendet das SAVE Attribut <- nicht zu empfehlen)
+    DEALLOCATE(p,n)
+    ! Wenn eine Datei nicht mehr benoetigt wird, diese schließen und der File Identifier ist
+    !   wieder freigegeben.
+    CLOSE(fId)
+    ! Nachfolgend wird der Index der Linie von 1 bis zu nLines, also der Anzahl an Punkten, gesetzt
+    !   Das wird hier mit einer IMPLIED DO LOOP gemacht. Das ist aber etwas advanced, man kann auch
+    !   einfach eine normale DO Schleife von 1 bis nLines nehmen und line%indx(i) = i schreiben
+    !   In Matlab gibt es die Funktion linspace, welche aehnlich arbeitet.
+    ! \\see http://www.simondriver.org/Teaching/AS3013/lectures/AS3013_lecture5.pdf Seite 5
+    ! \\see https://www.obliquity.com/computer/fortran/io.html
+    line%indx(1:nLines) = (/ (i, i=1,nLines) /)
+    line%nElements = nLines
+  END SUBROUTINE loadLineFromTXT
+  
+  !> \brief Schreiben einer Kontur in eine txt-Datei
+  !!
+  SUBROUTINE writeLine4ToTXT(line, filename, ierr)
+    ! Mit Sternchen ist die Laenge des Strings flexibel
+    CHARACTER(len=*), INTENT(IN) :: filename
+    TYPE(line4), INTENT(IN) :: line
+    INTEGER, INTENT(OUT) :: ierr
+    INTEGER :: fID, nLines, i
+    
+    ierr = 0
+    
+    fID = 435
+    nLines = line%nElements
+    
+    OPEN(fId, FILE=TRIM(filename), IOSTAT=ierr, ACTION='WRITE')
+    ! Der Formatstring (6(F10.5,:,' ') beschreibt, dass 6 Real Variablen mit je 10 Stellen und
+    !   davon 5 Nachkommastellen getrennt durch ein Leerzeichen hinereinander geschrieben werden sollen
+    WRITE(fId,"(6(F10.5,:,' '))",IOSTAT=ierr) (line%points(i)%v4(1:3), line%normals(i)%v4(1:3), i=1, nLines)
+    CLOSE(fId)
+  END SUBROUTINE writeLine4ToTXT
+    
+  !> \brief Laden einer txt-Datei in ein CHARACTER Array
+  !!
+  SUBROUTINE loadCHARfromTXT(dataArray, filename, ierr)
+    ! Mit Sternchen ist die Laenge des Strings flexibel
+    CHARACTER(len=*), INTENT(IN) :: filename
+    CHARACTER(char_norm), DIMENSION(:), ALLOCATABLE, INTENT(OUT) :: dataArray
+    INTEGER, INTENT(OUT) :: ierr
+    INTEGER :: fID, nLines
+    
+    ierr = 0
+    
+    fID = 436
+    ! Anzahl Zeilen
+    nLines = getNoRows(filename)
+    ! Pruefen ob Daten in der Datei waren
+    IF (nLines == 0) THEN
+      ierr = 1
+      RETURN
+    END IF
+    ! Speicher fuer die Line allokieren
+    ALLOCATE(dataArray(nLines))
+    
+    OPEN(fId, FILE=TRIM(filename), IOSTAT=ierr, ACTION='READ')
+    ! Wenn beim Oeffnen ein Fehler aufgetreten ist, dann Abbruch und zurueck zum Aufruf der Funktion
+    IF (ierr /= 0) RETURN
+    ! Den Format Identifier auf (A) = String gesetzt        
+    READ(fID,'(A)') dataArray
+    ! Datei schliessen
+    CLOSE(fId)
+  END SUBROUTINE loadCHARfromTXT
+  
+  !> \\ brief Funktion um die Anzahl an Zeilen in einer Datei zu bestimmen  
+  FUNCTION getNoRows(filename) RESULT (nLines)
+    CHARACTER(len=*), INTENT(IN) :: filename
+    INTEGER :: nLines
+    INTEGER :: ierr, fId
+    
+    fId = 435
+    nlines = 0
+    OPEN(fId, FILE=filename, IOSTAT=ierr, ACTION='READ')
+    ! Sicherstellen, dass beim naechsten oeffnen (unter dem gleichen File Identifier)
+    !   der Zeiger in der Datei auf dem Start steht. Eigentlich ueberfluessig!
+    REWIND(fId, IOSTAT=ierr)
+    DO
+      READ(fId,*,IOSTAT=ierr)
+      IF (ierr/=0) RETURN
+      nLines = nLines + 1
+    END DO
+    CLOSE(fId)
+  END FUNCTION getNoRows
+  
+  
+  !> \\ brief Funktion um die Anzahl an Spalten in einer Zeile zu bestimmen
+  RECURSIVE FUNCTION getNoCols(str, delim, number) RESULT (nCols)
+    CHARACTER(len=*), INTENT(IN) :: str
+    CHARACTER(len=*), INTENT(IN) :: delim
+    INTEGER, OPTIONAL, INTENT(INOUT) :: number
+    INTEGER :: nCols
+    INTEGER :: indexDelim, length
+    
+    ! Beim ersten aufruf ist die optionale Variable nicht gesetzt und daher wird bei 
+    !   nCols = 1 gestartet. Ab dann wird aufaddiert.
+    IF (PRESENT(number)) THEN
+      nCols = number + 1
+    ELSE
+      nCols = 1
+    END IF
+    
+    length = LEN_TRIM(ADJUSTL(str))
+    ! Sucht den Index des ersten Vorkommens des delimiters
+    indexDelim = INDEX(TRIM(ADJUSTL(str)), delim) + 1
+    ! Wenn ein weiterer delimiter gefunden wurde, wird die Funktion selber erneut aufgerufen
+    !   (rekursiv) und das gleiche Spiel noch einmal durchlaufen.
+    !   Am Ende werden rekursiv alle Funktionen verlassen und in nCols steht die Anzahl 
+    !   an Spalten.
+    IF (indexDelim > 1) nCols = getNoCols(ADJUSTL(str(indexDelim:length)), delim, nCols)
+    
+  END FUNCTION getNoCols
+
+END MODULE fIO_fileIO

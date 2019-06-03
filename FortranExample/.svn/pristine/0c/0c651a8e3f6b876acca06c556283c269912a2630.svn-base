@@ -1,0 +1,6 @@
+# The fortran modules provided by this target.
+provides
+ cc_contourcalculation
+ fio_fileio
+ ste_file
+ vector

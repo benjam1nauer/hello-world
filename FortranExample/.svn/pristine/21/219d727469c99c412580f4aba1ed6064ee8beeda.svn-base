@@ -1,0 +1,10 @@
+** Beispieldatei
+*0002 2
+*1000 gear.txt  ** Datei mit Werkstueckpunkten
+*1115 20.0
+*2000 ' tool.txt    '   ** Datei mit Werkzeugpunkten
+*3034 50
+*3000 kinematic.txt   ** Datei mit Werkzeugpunkten
+*3008 -0.8
+*3009 0.8
+*3012 10

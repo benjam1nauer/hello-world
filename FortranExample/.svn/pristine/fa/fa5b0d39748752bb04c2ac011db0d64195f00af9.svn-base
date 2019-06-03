@@ -1,0 +1,33 @@
+﻿  Copyright (C) 1985-2016 Intel Corporation. All rights reserved.
+  Intel(R) Compiler 16.0 Update 3 (package 207)
+   
+  cd Debug && cmake -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=v:/install-Debug ../
+  -- Configuring done
+  -- Generating done
+  -- Build files have been written to: V:/Entwicklung/FortranExample/Debug
+  cd Debug && time make
+  make[1]: Entering directory `/cygdrive/v/Entwicklung/FortranExample/Debug'
+  make[2]: Entering directory `/cygdrive/v/Entwicklung/FortranExample/Debug'
+  make[3]: Entering directory `/cygdrive/v/Entwicklung/FortranExample/Debug'
+  [35m[1mScanning dependencies of target FortranExample[0m
+  make[3]: Leaving directory `/cygdrive/v/Entwicklung/FortranExample/Debug'
+  make[3]: Entering directory `/cygdrive/v/Entwicklung/FortranExample/Debug'
+  make[4]: Entering directory `/cygdrive/v/Entwicklung/FortranExample/Debug'
+  [ 11%] [32mBuilding Fortran object CMakeFiles/FortranExample.dir/Source/CC_ContourCalculation.f90.obj[0m
+  make[4]: Leaving directory `/cygdrive/v/Entwicklung/FortranExample/Debug'
+  make[4]: Entering directory `/cygdrive/v/Entwicklung/FortranExample/Debug'
+  [ 22%] [32mBuilding Fortran object CMakeFiles/FortranExample.dir/Source/KIN_Kinematics.f90.obj[0m
+  make[4]: Leaving directory `/cygdrive/v/Entwicklung/FortranExample/Debug'
+  make[3]: Leaving directory `/cygdrive/v/Entwicklung/FortranExample/Debug'
+  make[3]: Entering directory `/cygdrive/v/Entwicklung/FortranExample/Debug'
+  [ 33%] [32mBuilding Fortran object CMakeFiles/FortranExample.dir/Source/FortranExample.f90.obj[0m
+  [ 44%] [32mBuilding Fortran object CMakeFiles/FortranExample.dir/Source/penetration.f90.obj[0m
+  [ 55%] [32m[1mLinking Fortran executable bin/FortranExample.exe[0m
+  make[3]: Leaving directory `/cygdrive/v/Entwicklung/FortranExample/Debug'
+  [100%] Built target FortranExample
+  make[2]: Leaving directory `/cygdrive/v/Entwicklung/FortranExample/Debug'
+  make[1]: Leaving directory `/cygdrive/v/Entwicklung/FortranExample/Debug'
+  
+  real	0m2.815s
+  user	0m0.210s
+  sys	0m0.561s

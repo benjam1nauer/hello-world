@@ -1,0 +1,52 @@
+﻿  Copyright (C) 1985-2016 Intel Corporation. All rights reserved.
+  Intel(R) Compiler 16.0 Update 3 (package 207)
+   
+  cd Release && cmake -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=v:/install-Release ../
+  -- The Fortran compiler identification is Intel 16.0.3.20160415
+  -- Check for working Fortran compiler: C:/Program Files (x86)/IntelSWTools/compilers_and_libraries/windows/bin/intel64_ia32/ifort.exe
+  -- Check for working Fortran compiler: C:/Program Files (x86)/IntelSWTools/compilers_and_libraries/windows/bin/intel64_ia32/ifort.exe  -- works
+  -- Detecting Fortran compiler ABI info
+  -- Detecting Fortran compiler ABI info - done
+  -- Checking whether C:/Program Files (x86)/IntelSWTools/compilers_and_libraries/windows/bin/intel64_ia32/ifort.exe supports Fortran 90
+  -- Checking whether C:/Program Files (x86)/IntelSWTools/compilers_and_libraries/windows/bin/intel64_ia32/ifort.exe supports Fortran 90 -- yes
+  -- Configuring done
+  -- Generating done
+  -- Build files have been written to: V:/Entwicklung/FortranExample/Release
+  cd Release && time make
+  make[1]: Entering directory `/cygdrive/v/Entwicklung/FortranExample/Release'
+  make[2]: Entering directory `/cygdrive/v/Entwicklung/FortranExample/Release'
+  make[3]: Entering directory `/cygdrive/v/Entwicklung/FortranExample/Release'
+  [35m[1mScanning dependencies of target FortranExample[0m
+  make[3]: Leaving directory `/cygdrive/v/Entwicklung/FortranExample/Release'
+  make[3]: Entering directory `/cygdrive/v/Entwicklung/FortranExample/Release'
+  make[4]: Entering directory `/cygdrive/v/Entwicklung/FortranExample/Release'
+  [ 11%] [32mBuilding Fortran object CMakeFiles/FortranExample.dir/Source/Datatypes.f90.obj[0m
+  make[4]: Leaving directory `/cygdrive/v/Entwicklung/FortranExample/Release'
+  make[4]: Entering directory `/cygdrive/v/Entwicklung/FortranExample/Release'
+  [ 22%] [32mBuilding Fortran object CMakeFiles/FortranExample.dir/Source/Vector.f90.obj[0m
+  make[4]: Leaving directory `/cygdrive/v/Entwicklung/FortranExample/Release'
+  make[4]: Entering directory `/cygdrive/v/Entwicklung/FortranExample/Release'
+  [ 33%] [32mBuilding Fortran object CMakeFiles/FortranExample.dir/Source/CC_ContourCalculation.f90.obj[0m
+  make[4]: Leaving directory `/cygdrive/v/Entwicklung/FortranExample/Release'
+  make[4]: Entering directory `/cygdrive/v/Entwicklung/FortranExample/Release'
+  [ 44%] [32mBuilding Fortran object CMakeFiles/FortranExample.dir/Source/fIO_FileIO.f90.obj[0m
+  make[4]: Leaving directory `/cygdrive/v/Entwicklung/FortranExample/Release'
+  make[4]: Entering directory `/cygdrive/v/Entwicklung/FortranExample/Release'
+  [ 55%] [32mBuilding Fortran object CMakeFiles/FortranExample.dir/Source/KIN_Kinematics.f90.obj[0m
+  make[4]: Leaving directory `/cygdrive/v/Entwicklung/FortranExample/Release'
+  make[4]: Entering directory `/cygdrive/v/Entwicklung/FortranExample/Release'
+  [ 66%] [32mBuilding Fortran object CMakeFiles/FortranExample.dir/Source/STE_File.f90.obj[0m
+  make[4]: Leaving directory `/cygdrive/v/Entwicklung/FortranExample/Release'
+  make[3]: Leaving directory `/cygdrive/v/Entwicklung/FortranExample/Release'
+  make[3]: Entering directory `/cygdrive/v/Entwicklung/FortranExample/Release'
+  [ 77%] [32mBuilding Fortran object CMakeFiles/FortranExample.dir/Source/FortranExample.f90.obj[0m
+  [ 88%] [32mBuilding Fortran object CMakeFiles/FortranExample.dir/Source/penetration.f90.obj[0m
+  [100%] [32m[1mLinking Fortran executable bin/FortranExample.exe[0m
+  make[3]: Leaving directory `/cygdrive/v/Entwicklung/FortranExample/Release'
+  [100%] Built target FortranExample
+  make[2]: Leaving directory `/cygdrive/v/Entwicklung/FortranExample/Release'
+  make[1]: Leaving directory `/cygdrive/v/Entwicklung/FortranExample/Release'
+  
+  real	0m6.159s
+  user	0m0.376s
+  sys	0m0.938s
