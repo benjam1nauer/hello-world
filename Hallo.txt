@@ -6,3 +6,5 @@ Eine Aenerung im "erster_branch" branch
 
 Eine Änderung im "unter_branch" branch, welcher ein "Snapshot" des "erster_branch" branches sein sollte.
 Eine letzte Änderung um sich die Änderungshistorie anzusehen
+
+Eine Änderung im feature-branch erstellt.
