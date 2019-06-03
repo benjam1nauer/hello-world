@@ -1,0 +1,374 @@
+!> \\brief Dieses MODULE fasst Funktionalitaeten zum Schnitt von zwei Konturlinien 
+!          zusammen. Alle oeffentlichen Routinen starten mit CC_. Zuerst werden
+!          mit CC_setContour die beiden Konturen im Module gespeichert und anschliessend
+!          werden diese mit entsprechenden Funktionen geschnitten und ausgewertet.
+MODULE CC_ContourCalculation
+
+! Wir binden das Datatypes ein
+USE Datatypes
+! und das MODULE Vector auch
+USE Vector
+
+IMPLICIT NONE
+
+PRIVATE
+
+PUBLIC :: CC_data
+PUBLIC :: CC_setContour
+PUBLIC :: CC_getContour
+PUBLIC :: CC_cutContour
+PUBLIC :: CC_getDifference
+
+TYPE :: CC_data
+  PRIVATE
+  TYPE(line4) :: rigidContour, softContour, diffContour
+  REAL(real_norm), DIMENSION(:), ALLOCATABLE :: distanceNormal
+END TYPE CC_data
+
+!> \brief Laden eines Punktezugs
+INTERFACE CC_setContour
+  MODULE PROCEDURE setContour4
+END INTERFACE CC_setContour
+
+!> \brief Punktezug auslesen
+INTERFACE CC_getContour
+  MODULE PROCEDURE getContour4
+END INTERFACE CC_getContour
+
+!> \brief Schneiden der beiden Punktezuege
+INTERFACE CC_cutContour
+  MODULE PROCEDURE cutContour
+END INTERFACE CC_cutContour
+
+!> \brief Differenz (Dicke) zwischen den Punktezuegen berechnen
+INTERFACE CC_getDifference
+  MODULE PROCEDURE getDistance
+  MODULE PROCEDURE getArea
+END INTERFACE CC_getDifference
+
+! Lokale Variablen
+INTEGER :: ierr = 0
+INTEGER, PARAMETER :: fieldSize = 100
+TYPE(CC_data) :: this
+
+CONTAINS
+  
+  !> \brief Laden einer Kontour aus einem Linienzug
+  !!
+  SUBROUTINE setContour4(this, contour, contourType)
+    TYPE(CC_data), INTENT(INOUT) :: this
+    TYPE(line4), INTENT(IN) :: contour
+    CHARACTER(len=*), INTENT(IN) :: contourType
+    
+    ! Abfragen welche Type von Kontur gesetzt werden soll.
+    IF (TRIM(contourType) == 'soft') THEN
+      CALL allocateLine(this%softContour, contour%nElements)
+      this%softContour = contour
+    ELSE ! rigid
+      CALL allocateLine(this%rigidContour, contour%nElements)
+      this%rigidContour = contour
+    END IF
+  END SUBROUTINE setContour4
+  
+  !> \brief Auslesen einer Kontour
+  !!
+  SUBROUTINE getContour4(this, contour, contourType)
+    TYPE(CC_data), INTENT(INOUT) :: this
+    TYPE(line4), INTENT(INOUT) :: contour
+    CHARACTER(len=*), INTENT(IN) :: contourType
+    
+    IF (TRIM(contourType) == 'soft') THEN
+      CALL allocateLine(contour, this%softContour%nElements)
+      contour = this%softContour
+    ELSE
+      CALL allocateLine(contour, this%rigidContour%nElements)
+      contour = this%rigidContour
+    END IF
+  END SUBROUTINE getContour4
+  
+  !> \brief Schneiden der Kontouren und abspeichern der Kontur in this%softContour
+  !!
+  SUBROUTINE cutContour(this, noOfIntersections, ierr)
+    TYPE(CC_data), INTENT(INOUT) :: this
+    INTEGER, INTENT(OUT) :: noOfIntersections
+    INTEGER, INTENT(OUT) :: ierr
+    INTEGER :: currentContour
+    TYPE(line4) :: newContour
+    INTEGER :: nIS
+    INTEGER, DIMENSION(fieldSize) :: iIS1, iIS2
+    TYPE(vector4), DIMENSION(fieldSize) :: pointsIS, normalsIS
+    INTEGER :: k, i, i1, i2, nElements
+    
+    ierr = 0
+    noOfIntersections = 0
+    
+    ! Schnittpunkte berechnen
+    CALL calcIntersection(this%softContour%points, this%softContour%normals, &
+      this%rigidContour%points, this%rigidContour%normals, &
+      pointsIS, normalsIS, nIS, iIS1, iIS2, ierr)
+    ! Anzahl der Schnittpunkte als Rueckgabewert setzen
+    noOfIntersections = nIS
+    ! Wenn keine Schnittpunkte gefunden wurden, zurueck
+    IF (nIS == 0) THEN
+      RETURN
+    END IF
+      
+    ! Pruefen ob gerade Anzahl an Schnittpunkten gefunden wurde, wenn nicht Fehler
+    IF (MOD(nIS, 2) /= 0) THEN
+      ierr = 1
+      RETURN
+    END IF
+    ! Wenn Schnittpunkte gefunden wurden
+    ! Anlegen eines Felds zum Sichern der resultierenden Lueckenkontur
+    IF (nIS > 0) CALL allocateLine(newContour, this%rigidContour%nElements+this%softContour%nElements)
+    IF (nIS > 0) CALL allocateLine(this%diffContour, this%rigidContour%nElements+this%softContour%nElements)
+    
+    i = 1
+    i1 = 1
+    i2 = 1
+    currentContour = 1
+    createContour : DO k = 1, nIS
+      IF (currentContour == 1) THEN
+        newContour%points(i:i+iIS1(k)-i1) = this%softContour%points(i1:iIS1(k))
+        newContour%normals(i:i+iIS1(k)-i1) = this%softContour%normals(i1:iIS1(k))
+        newContour%indx(i:i+iIS1(k)-i1) = this%softContour%indx(i1:iIS1(k))
+        i = i+iIS1(k)-i1+1
+      ELSEIF (currentContour == 2) THEN
+        newContour%points(i:i+iIS2(k)-i2) = this%rigidContour%points(i2:iIS2(k))
+        newContour%normals(i:i+iIS2(k)-i2) = -this%rigidContour%normals(i2:iIS2(k))
+        newContour%indx(i:i+iIS2(k)-i2) = this%rigidContour%indx(i2:iIS2(k))
+        i = i+iIS2(k)-i2+1
+      END IF
+      newContour%points(i) = pointsIS(k)
+      newContour%normals(i) = normalsIS(k)
+      newContour%indx(i) = this%rigidContour%indx(iIS2(k)-1)
+      i = i + 1
+      currentContour = 3 - currentContour
+      i1 = iIS1(k)+1
+      i2 = iIS2(k)+1
+      ! Nach jedem zweiten Schnittpunkt die Differenzflaeche bestimmen
+      IF (MOD(k,2) == 0) THEN
+        ! Schnittflaeche bestimmen
+        IF (iIS2(k-1) < iIS2(k)) THEN
+          ! Beide Linien haben ausreichend Punkte
+          ! Ersten Schnittpunkt zur Differenzlinie hinzufuegen
+          this%diffContour%points(this%diffContour%nElements+1) = pointsIS(k-1)
+          this%diffContour%normals(this%diffContour%nElements+1) = normalsIS(k-1)
+          ! Randpunkte des Spanungsquerschnitts werden mit -1 im indx markiert
+          this%diffContour%indx(this%diffContour%nElements+1) = -1
+          this%diffContour%nElements = this%diffContour%nElements + 1
+          ! Punkte des Werkzeugs hinzufuegen
+          nElements = iIS2(k)-iIS2(k-1)
+          this%diffContour%points(this%diffContour%nElements+1:this%diffContour%nElements+nElements) = &
+            this%rigidContour%points(iIS2(k-1)+1:iIS2(k))
+          this%diffContour%normals(this%diffContour%nElements+1:this%diffContour%nElements+nElements) = &
+            this%rigidContour%normals(iIS2(k-1)+1:iIS2(k))
+          this%diffContour%indx(this%diffContour%nElements+1:this%diffContour%nElements+nElements) = &
+            this%rigidContour%indx(iIS2(k-1)+1:iIS2(k))
+          this%diffContour%nElements = this%diffContour%nElements + nElements
+          ! Zweiten Schnittpunkt zur Differenzlinie hinzufuegen
+          this%diffContour%points(this%diffContour%nElements+1) = pointsIS(k)
+          this%diffContour%normals(this%diffContour%nElements+1) = normalsIS(k)
+          ! Randpunkte des Spanungsquerschnitts werden mit -1 im indx markiert
+          this%diffContour%indx(this%diffContour%nElements+1) = -1
+          this%diffContour%nElements = this%diffContour%nElements + 1
+        ELSE IF (iIS1(k-1) < iIS1(k)) THEN
+          ! Es liegt kein Werkzeugpunkt zwischen den Schnittpunkten
+          !  Fall wird hier ignoriert
+        END IF
+      END IF
+    END DO createContour
+    ! Kontur bis zum Ende fortsetzen
+    newContour%nElements = i + this%softContour%nElements - i1
+    newContour%points(i:newContour%nElements) = this%softContour%points(i1:this%softContour%nElements)
+    newContour%normals(i:newContour%nElements) = this%softContour%normals(i1:this%softContour%nElements)
+    newContour%indx(i:newContour%nElements) = this%softContour%indx(i1:this%softContour%nElements)
+        
+    ! Abstaende zwischen den Konturen berechnen
+    CALL calcDistanceDiffToSoft(this)
+    
+    this%softContour = newContour
+    CALL deallocateLine(newContour)
+    
+  END SUBROUTINE cutContour
+  
+  !> \\brief Berechnet die Distanz zwischen der diffContour und der softContour
+  !!
+  SUBROUTINE calcDistanceDiffToSoft(this)
+    TYPE(CC_data), INTENT(INOUT) :: this
+    REAL(real_norm) :: tau1, tau2, tau2min
+    TYPE(vector4) :: tmpPoint
+    INTEGER :: iDiff, iPoints
+  
+    ! Abstaende zwischen den Konturen berechnen
+    IF (ALLOCATED(this%distanceNormal)) DEALLOCATE(this%distanceNormal)
+    ALLOCATE(this%distanceNormal(this%diffContour%nElements))
+    this%distanceNormal = 0.0D0
+    DO iDiff = 1, this%diffContour%nElements
+      tau2min = 1000
+      ! Wenn der indx -1 ist, dann ist es ein Randpunkt -> Schleife loopen
+      IF (this%diffContour%indx(iDiff) == -1) CYCLE
+      DO iPoints = 1, this%softContour%nElements-1
+        tmpPoint%v4(1:4) = this%diffContour%points(iDiff)%v4(1:4) - this%diffContour%normals(iDiff)%v4(1:4)
+        CALL lineIntersection(this%softContour%points(iPoints)%v4(1:2), this%softContour%points(iPoints+1)%v4(1:2), &
+          this%diffContour%points(iDiff)%v4(1:2), tmpPoint%v4(1:2), tau1, tau2)
+        IF (tau1 > 0 .AND. tau1 < 1.0D0) THEN
+          IF (tau2 > 0 .AND. tau2 < tau2min) tau2min = tau2
+        END IF
+      END DO
+      this%distanceNormal(iDiff) = tau2min
+    END DO
+  END SUBROUTINE calcDistanceDiffToSoft
+  
+  !> \\brief Liefert die Differenzen zurueck
+  !!
+  SUBROUTINE getDistance(this, diff)
+    TYPE(CC_data), INTENT(INOUT) :: this
+    REAL(real_norm), DIMENSION(:), ALLOCATABLE, INTENT(OUT) :: diff
+    
+    IF (ALLOCATED(diff)) DEALLOCATE(diff)
+    ALLOCATE(diff(this%diffContour%nElements))
+    diff =  this%distanceNormal
+  END SUBROUTINE getDistance
+  
+  !> \\brief Liefert die Differenzflaeche zurueck
+  !!
+  SUBROUTINE getArea(this, area)
+    TYPE(CC_data), INTENT(INOUT) :: this
+    REAL(real_norm), INTENT(OUT) :: area
+    
+    INTEGER :: i
+    
+    area = 0
+    DO i = 1, this%diffContour%nElements-1
+      area =  area + this%distanceNormal(i) * &
+        vectorLength(this%diffContour%points(i+1)-this%diffContour%points(i))
+    END DO
+  END SUBROUTINE getArea
+  
+  !> \\brief Suche nach Schnitten von zwei Linienzuegen (2-dimensionale Betrachtung)
+  !! Parameter:
+  !!    points1    Koordinaten der Punkte des ersten Linienzugs
+  !!    points2    Koordinaten der Punkte des zweiten Linienzugs
+  !!    Schnittpunkt    Koordinaten des ersten gefundenen Schnittpunkts
+  !!    IndxSchnitt Indizes der Abschnitte des ersten Schnittpunkts
+  !!
+  SUBROUTINE calcIntersection (points1, normals1, points2, normals2, &
+    pointsIS, normalsIS, nIntersection, indxIS1, indxIS2, ierr)
+    
+    TYPE(vector4), DIMENSION(:), INTENT(IN) :: points1, normals1
+    TYPE(vector4), DIMENSION(:), INTENT(IN) :: points2, normals2
+    TYPE(vector4), DIMENSION(:), INTENT(INOUT) :: pointsIS, normalsIS
+    INTEGER, DIMENSION(:), INTENT(INOUT) :: indxIS1, indxIS2
+    INTEGER, INTENT(OUT) :: nIntersection
+    INTEGER, INTENT(OUT) :: ierr
+    REAL(real_norm) :: tau1, tau2
+    INTEGER :: i, j, size1, size2
+    TYPE(vector4) :: tmpNormal1, tmpNormal2
+    
+    ierr = 0
+
+    indxIS1 = 0
+    indxIS2 = 0
+    nIntersection = 0
+    size1 = SIZE(points1)
+    size2 = SIZE(points2)
+    DO i = 1, size1-1
+      DO j = 1, size2-1
+        ! Es kann nur dann ein Schnitt zwischen beiden Abschnitten existieren, wenn
+        !  sich die beiden Abschnitte sowohl in x- als auch in y-Richtung ueberlappen
+        IF (intersectBB(points1(i), points1(i+1), points2(j), points2(j+1))) THEN
+          ! Exakten Schnittpunkt suchen
+          CALL lineIntersection(points1(i)%v4(1:2), points1(i+1)%v4(1:2), &
+          points2(j)%v4(1:2), points2(j+1)%v4(1:2), tau1, tau2)
+          IF (tau1 >= 0.0D0 .AND. tau1 <= 1.0D0) THEN
+            ! Der zweite Abschnitt oder dessen Verlaengerung schneidet den ersten
+            !  Abschnitt
+            IF (tau2 >= 0.0D0 .AND. tau2 <= 1.0D0) THEN
+              ! Auch der erste Abschnitt oder dessen Verlaengerung schneidet den
+              !  zweiten Abschnitt, somit haben beide Abschnitte einen gemeinsamen
+              !  Schnittpunkt
+              nIntersection = nIntersection + 1
+              IF (nIntersection > SIZE(pointsIS)) THEN
+                ierr = 1
+                RETURN
+              END IF
+              indxIS1(nIntersection) = i
+              indxIS2(nIntersection) = j
+              pointsIS(nIntersection) = points1(i) + tau1*(points1(i+1)-points1(i))
+              tmpNormal1 = normals1(i) + tau1*(normals1(i+1)-normals1(i))
+              tmpNormal1 = vectorLength(tmpNormal1)
+              tmpNormal2 = normals2(i) + tau1*(normals2(i+1)-normals2(i))
+              tmpNormal2 = vectorLength(tmpNormal2)
+              normalsIS(nIntersection) = (tmpNormal1+tmpNormal2)/vectorLength(tmpNormal1+tmpNormal2)
+              normalsIS(nIntersection)%v4(1) = -normalsIS(nIntersection)%v4(1)
+            END IF
+          END IF
+        END IF
+      END DO  ! points2
+    END DO  ! points1
+    
+    CONTAINS ! Alles was jetzt kommt steht nur innerhalb von intersection zur Verfuegung
+    
+      !> \\brief Gibt TRUE zurueck, wenn sich die Bounding Boxen schneiden
+      !
+      FUNCTION intersectBB (p1, p2, q1, q2) RESULT(intersection)
+        TYPE(Vector4), INTENT(IN) :: p1, p2, q1, q2
+        LOGICAL :: intersection
+
+        intersection = .TRUE.
+
+        IF (p1%v4(1) < p2%v4(1)) THEN
+          IF ((q1%v4(1) < p1%v4(1) .AND. q2%v4(1) < p1%v4(1)) .OR. (q1%v4(1) > p2%v4(1) .AND. q2%v4(1) > p2%v4(1))) THEN
+            intersection = .FALSE.
+            RETURN
+          END IF
+        ELSE
+          IF ((q1%v4(1) < p2%v4(1) .AND. q2%v4(1) < p2%v4(1)) .OR. (q1%v4(1) > p1%v4(1) .AND. q2%v4(1) > p1%v4(1))) THEN
+            intersection = .FALSE.
+            RETURN
+          END IF
+        END IF
+        IF (p1%v4(2) < p2%v4(2)) THEN
+          IF ((q1%v4(2) < p1%v4(2) .AND. q2%v4(2) < p1%v4(2)) .OR. (q1%v4(2) > p2%v4(2) .AND. q2%v4(2) > p2%v4(2))) THEN
+            intersection = .FALSE.
+            RETURN
+          END IF
+        ELSE
+          IF ((q1%v4(2) < p2%v4(2) .AND. q2%v4(2) < p2%v4(2)) .OR. (q1%v4(2) > p1%v4(2) .AND. q2%v4(2) > p1%v4(2))) THEN
+            intersection = .FALSE.
+            RETURN
+          END IF
+        END IF
+      END FUNCTION intersectBB
+    END SUBROUTINE calcIntersection
+    
+    !> \\brief Loest ein Lineares Gleichungssystem um Schnittpunkte zu berechenen
+    !
+    SUBROUTINE lineIntersection(p11, p12, p21, p22, tau1, tau2)
+      REAL(real_norm), DIMENSION(2), INTENT(IN) :: p11, p12, p21, p22
+      REAL(real_norm), INTENT(OUT) :: tau1, tau2
+      REAL(real_norm) :: r1, r2, det
+      REAL(real_norm), DIMENSION(2,2) :: matrix
+      
+      tau1 = 0.0D0
+      tau2 = 0.0D0
+      !  Aufstellen des Gleichungssystems zur Bestimmung des Schnittpunkts:
+      !  u1 + tau(1)*v1 = u2 + tau(2)*v2   mit u1, u2: 2D-Ortsvektoren
+      !                                        v1, v2: 2D-Richtungsvektoren      
+      matrix(1, 1) = p11(1) - p12(1)
+      matrix(2, 1) = p11(2) - p12(2)
+      matrix(1, 2) = p22(1) - p21(1)
+      matrix(2, 2) = p22(2) - p21(2)
+      det = matrix(1, 1)*matrix(2, 2) - matrix(2, 1)*matrix(1, 2)
+      IF (ABS(det) > 0.0D0) THEN
+        ! Die Determinante ist ungleich Null, somit ist das Gleichungssystem
+        !  eindeutig loesbar
+        r1 = p11(1) - p21(1)
+        r2 = p11(2) - p21(2)
+        tau1 = (r1*matrix(2, 2) - r2*matrix(1, 2)) / det
+        tau2 = (matrix(1, 1)*r2 - matrix(2, 1)*r1) / det
+      END IF
+    END SUBROUTINE lineIntersection
+        
+END MODULE CC_ContourCalculation

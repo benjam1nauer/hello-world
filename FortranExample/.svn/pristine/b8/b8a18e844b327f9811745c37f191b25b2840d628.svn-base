@@ -1,0 +1,10 @@
+** Beispieldatei
+*0002 2
+*1000 gear.txt  ** Datei mit Werkstueckpunkten
+*1115 25
+*2000 ' tool.txt    '   ** Datei mit Werkzeugpunkten
+*3034 70
+*3000 kinematic.txt   ** Datei mit Werkzeugpunkten
+*3008 -1  ** Start der Bewegung
+*3009 1  ** Ende der Bewegung
+*3012 21  ** Anzahl an Simulationsinkrementen

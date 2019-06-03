@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Source\Files">
+      <UniqueIdentifier>{af491f22-8b07-4002-b4a6-cfc86c4bc3d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Penetration">
+      <UniqueIdentifier>{0121910a-592a-4515-9ef1-157a9ae782d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Datatypes">
+      <UniqueIdentifier>{66827660-3620-4296-9da1-47ede3f2de89}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="00_Readme">
+      <UniqueIdentifier>{16bed79d-15fc-4471-a471-fb32daedca03}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Source\FortranExample.f90">
+      <Filter>Source</Filter>
+    </None>
+    <None Include="Source\Vector.f90">
+      <Filter>Source\Datatypes</Filter>
+    </None>
+    <None Include="Source\CC_ContourCalculation.f90">
+      <Filter>Source\Penetration</Filter>
+    </None>
+    <None Include="Source\KIN_Kinematics.f90">
+      <Filter>Source</Filter>
+    </None>
+    <None Include="Source\penetration.f90">
+      <Filter>Source\Penetration</Filter>
+    </None>
+    <None Include="00_Readme\GT_FORTRAN_Richtlinie.f90">
+      <Filter>00_Readme</Filter>
+    </None>
+    <None Include="Source\Datatypes.f90">
+      <Filter>Source\Datatypes</Filter>
+    </None>
+    <None Include="Source\fIO_FileIO.f90">
+      <Filter>Source\Files</Filter>
+    </None>
+    <None Include="Source\STE_File.f90">
+      <Filter>Source\Files</Filter>
+    </None>
+    <None Include="00_Readme\readme.md">
+      <Filter>00_Readme</Filter>
+    </None>
+  </ItemGroup>
+</Project>

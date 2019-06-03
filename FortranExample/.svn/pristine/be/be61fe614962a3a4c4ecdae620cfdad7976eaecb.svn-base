@@ -1,0 +1,99 @@
+The system is: Windows - 6.1.7601 - AMD64
+Compiling the Fortran compiler identification source file "CMakeFortranCompilerId.F" succeeded.
+Compiler: C:/Program Files (x86)/IntelSWTools/compilers_and_libraries/windows/bin/intel64_ia32/ifort.exe 
+Build flags: 
+Id flags: -fpp
+
+The output was:
+0
+Intel(R) Visual Fortran Compiler for applications running on IA-32, Version 16.0 Build 20160415
+Copyright (C) 1985-2016 Intel Corporation.  All rights reserved.
+
+Microsoft (R) Incremental Linker Version 14.00.23026.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+-out:CMakeFortranCompilerId.exe 
+-subsystem:console 
+CMakeFortranCompilerId.obj 
+
+
+Compilation of the Fortran compiler identification source "CMakeFortranCompilerId.F" produced "CMakeFortranCompilerId.exe"
+
+Compilation of the Fortran compiler identification source "CMakeFortranCompilerId.F" produced "CMakeFortranCompilerId.obj"
+
+The Fortran compiler identification is Intel, found in "V:/Entwicklung/FortranExample/Release/CMakeFiles/3.6.1/CompilerIdFortran/CMakeFortranCompilerId.exe"
+
+Determining if the Fortran compiler works passed with the following output:
+Change Dir: V:/Entwicklung/FortranExample/Release/CMakeFiles/CMakeTmp
+
+Run Build Command:"C:/cygwin/bin/gmake.exe" "cmTC_44199/fast"
+gmake[1]: Entering directory `/cygdrive/v/Entwicklung/FortranExample/Release/CMakeFiles/CMakeTmp'
+/usr/bin/gmake -f CMakeFiles/cmTC_44199.dir/build.make CMakeFiles/cmTC_44199.dir/build
+gmake[2]: Entering directory `/cygdrive/v/Entwicklung/FortranExample/Release/CMakeFiles/CMakeTmp'
+Building Fortran object CMakeFiles/cmTC_44199.dir/testFortranCompiler.f.obj
+"C:/Program Files (x86)/IntelSWTools/compilers_and_libraries/windows/bin/intel64_ia32/ifort.exe"   /nologo /fpp   /W1 /nologo /fpp /libs:dll /threads  /Od /debug:full /dbglibs   /FoCMakeFiles/cmTC_44199.dir/testFortranCompiler.f.obj /FdCMakeFiles/cmTC_44199.dir/ -c V:/Entwicklung/FortranExample/Release/CMakeFiles/CMakeTmp/testFortranCompiler.f
+Linking Fortran executable cmTC_44199.exe
+"C:/Program Files/CMake/bin/cmake.exe" -E vs_link_exe --intdir=CMakeFiles/cmTC_44199.dir --manifests  -- xilink /nologo @CMakeFiles/cmTC_44199.dir/objects1.rsp  /out:cmTC_44199.exe /implib:cmTC_44199.lib /pdb:V:/Entwicklung/FortranExample/Release/CMakeFiles/CMakeTmp/cmTC_44199.pdb /version:0.0   /machine:X86  /debug /INCREMENTAL /subsystem:console  user32.lib 
+gmake[2]: Leaving directory `/cygdrive/v/Entwicklung/FortranExample/Release/CMakeFiles/CMakeTmp'
+gmake[1]: Leaving directory `/cygdrive/v/Entwicklung/FortranExample/Release/CMakeFiles/CMakeTmp'
+
+
+Detecting Fortran compiler ABI info compiled with the following output:
+Change Dir: V:/Entwicklung/FortranExample/Release/CMakeFiles/CMakeTmp
+
+Run Build Command:"C:/cygwin/bin/gmake.exe" "cmTC_a9357/fast"
+gmake[1]: Entering directory `/cygdrive/v/Entwicklung/FortranExample/Release/CMakeFiles/CMakeTmp'
+/usr/bin/gmake -f CMakeFiles/cmTC_a9357.dir/build.make CMakeFiles/cmTC_a9357.dir/build
+gmake[2]: Entering directory `/cygdrive/v/Entwicklung/FortranExample/Release/CMakeFiles/CMakeTmp'
+Building Fortran object CMakeFiles/cmTC_a9357.dir/CMakeFortranCompilerABI.F.obj
+"C:/Program Files (x86)/IntelSWTools/compilers_and_libraries/windows/bin/intel64_ia32/ifort.exe"   /nologo /fpp   /W1 /nologo /fpp /libs:dll /threads  /Od /debug:full /dbglibs   /FoCMakeFiles/cmTC_a9357.dir/CMakeFortranCompilerABI.F.obj /FdCMakeFiles/cmTC_a9357.dir/ -c "C:/Program Files/CMake/share/cmake-3.6/Modules/CMakeFortranCompilerABI.F"
+Linking Fortran executable cmTC_a9357.exe
+"C:/Program Files/CMake/bin/cmake.exe" -E vs_link_exe --intdir=CMakeFiles/cmTC_a9357.dir --manifests  -- xilink /nologo @CMakeFiles/cmTC_a9357.dir/objects1.rsp  /out:cmTC_a9357.exe /implib:cmTC_a9357.lib /pdb:V:/Entwicklung/FortranExample/Release/CMakeFiles/CMakeTmp/cmTC_a9357.pdb /version:0.0   /machine:X86 -v /debug /INCREMENTAL /subsystem:console   
+LINK : warning LNK4044: unrecognized option '/v'; ignored
+LINK : warning LNK4044: unrecognized option '/v'; ignored
+LINK : warning LNK4044: unrecognized option '/v'; ignored
+gmake[2]: Leaving directory `/cygdrive/v/Entwicklung/FortranExample/Release/CMakeFiles/CMakeTmp'
+gmake[1]: Leaving directory `/cygdrive/v/Entwicklung/FortranExample/Release/CMakeFiles/CMakeTmp'
+
+
+Parsed Fortran implicit link information from above output:
+  link line regex: [^( *|.*[/\])(link\.exe|([^/\]+-)?ld|collect2)[^/\]*( |$)]
+  ignore line: [Change Dir: V:/Entwicklung/FortranExample/Release/CMakeFiles/CMakeTmp]
+  ignore line: []
+  ignore line: [Run Build Command:"C:/cygwin/bin/gmake.exe" "cmTC_a9357/fast"]
+  ignore line: [gmake[1]: Entering directory `/cygdrive/v/Entwicklung/FortranExample/Release/CMakeFiles/CMakeTmp']
+  ignore line: [/usr/bin/gmake -f CMakeFiles/cmTC_a9357.dir/build.make CMakeFiles/cmTC_a9357.dir/build]
+  ignore line: [gmake[2]: Entering directory `/cygdrive/v/Entwicklung/FortranExample/Release/CMakeFiles/CMakeTmp']
+  ignore line: [Building Fortran object CMakeFiles/cmTC_a9357.dir/CMakeFortranCompilerABI.F.obj]
+  ignore line: ["C:/Program Files (x86)/IntelSWTools/compilers_and_libraries/windows/bin/intel64_ia32/ifort.exe"   /nologo /fpp   /W1 /nologo /fpp /libs:dll /threads  /Od /debug:full /dbglibs   /FoCMakeFiles/cmTC_a9357.dir/CMakeFortranCompilerABI.F.obj /FdCMakeFiles/cmTC_a9357.dir/ -c "C:/Program Files/CMake/share/cmake-3.6/Modules/CMakeFortranCompilerABI.F"]
+  ignore line: [Linking Fortran executable cmTC_a9357.exe]
+  ignore line: ["C:/Program Files/CMake/bin/cmake.exe" -E vs_link_exe --intdir=CMakeFiles/cmTC_a9357.dir --manifests  -- xilink /nologo @CMakeFiles/cmTC_a9357.dir/objects1.rsp  /out:cmTC_a9357.exe /implib:cmTC_a9357.lib /pdb:V:/Entwicklung/FortranExample/Release/CMakeFiles/CMakeTmp/cmTC_a9357.pdb /version:0.0   /machine:X86 -v /debug /INCREMENTAL /subsystem:console   ]
+  ignore line: [LINK : warning LNK4044: unrecognized option '/v']
+  ignore line: [ ignored]
+  ignore line: [LINK : warning LNK4044: unrecognized option '/v']
+  ignore line: [ ignored]
+  ignore line: [LINK : warning LNK4044: unrecognized option '/v']
+  ignore line: [ ignored]
+  ignore line: [gmake[2]: Leaving directory `/cygdrive/v/Entwicklung/FortranExample/Release/CMakeFiles/CMakeTmp']
+  ignore line: [gmake[1]: Leaving directory `/cygdrive/v/Entwicklung/FortranExample/Release/CMakeFiles/CMakeTmp']
+  ignore line: []
+  implicit libs: []
+  implicit dirs: []
+  implicit fwks: []
+
+
+Determining if the Fortran compiler supports Fortran 90 passed with the following output:
+Change Dir: V:/Entwicklung/FortranExample/Release/CMakeFiles/CMakeTmp
+
+Run Build Command:"C:/cygwin/bin/gmake.exe" "cmTC_f6c91/fast"
+gmake[1]: Entering directory `/cygdrive/v/Entwicklung/FortranExample/Release/CMakeFiles/CMakeTmp'
+/usr/bin/gmake -f CMakeFiles/cmTC_f6c91.dir/build.make CMakeFiles/cmTC_f6c91.dir/build
+gmake[2]: Entering directory `/cygdrive/v/Entwicklung/FortranExample/Release/CMakeFiles/CMakeTmp'
+Building Fortran object CMakeFiles/cmTC_f6c91.dir/testFortranCompilerF90.f90.obj
+"C:/Program Files (x86)/IntelSWTools/compilers_and_libraries/windows/bin/intel64_ia32/ifort.exe"   /nologo /fpp   /W1 /nologo /fpp /libs:dll /threads  /Od /debug:full /dbglibs   /FoCMakeFiles/cmTC_f6c91.dir/testFortranCompilerF90.f90.obj /FdCMakeFiles/cmTC_f6c91.dir/ -c V:/Entwicklung/FortranExample/Release/CMakeFiles/CMakeTmp/testFortranCompilerF90.f90
+Linking Fortran executable cmTC_f6c91.exe
+"C:/Program Files/CMake/bin/cmake.exe" -E vs_link_exe --intdir=CMakeFiles/cmTC_f6c91.dir --manifests  -- xilink /nologo @CMakeFiles/cmTC_f6c91.dir/objects1.rsp  /out:cmTC_f6c91.exe /implib:cmTC_f6c91.lib /pdb:V:/Entwicklung/FortranExample/Release/CMakeFiles/CMakeTmp/cmTC_f6c91.pdb /version:0.0   /machine:X86  /debug /INCREMENTAL /subsystem:console  user32.lib 
+gmake[2]: Leaving directory `/cygdrive/v/Entwicklung/FortranExample/Release/CMakeFiles/CMakeTmp'
+gmake[1]: Leaving directory `/cygdrive/v/Entwicklung/FortranExample/Release/CMakeFiles/CMakeTmp'
+
+

@@ -1,0 +1,124 @@
+!> \brief Beschreibung des Moduls
+!!  ruhig auch ueber mehrere Zeilen
+!!
+!!  Richtlinien:
+!!  - Einrueckungen sind zwei Leerzeichen
+!!  - Zeilenlaenge betraegt maximale 90 Zeichen (+/-)
+!!  - Module sind zukuenftig immer private, relevante Funktionen nach aussen public
+!!  - Es werden keine Intel-spezifischen Befehle verwendet
+!!  - POINTER sind nicht zu empfehlen
+!!  - Schnittstellen nach aussen stehen immer in einem Interface und nutzen entweder
+!!    allgemeine Datentypen (SETTINGS/WST/WZG/KIN/RESULTS) oder einfache Datentypen
+!!    wie INTEGER und REAL(-Felder) oder Vektor4
+!!  - Keine reservierten Bezeichnungen als Variablennamen
+!!  - Zaehlvariablen in Schleifen sind i, j, k, etc. kein x oder y
+!!  - lokal kann ein Modul mit eigenen Datentypen arbeiten
+!!  - Kommentare stehen mit dem Quellcode in einer Flucht
+!!  - Es gibt (fast) keinen Grund GOTO zu verwenden Funktionen mit RETURN verlassen
+!!  - Fehlerkenner werden eindeutig gesetzt und in der Fehler.properties Datei eingetragen
+!!  - Kommentieren mit Doxygen, sollte im Wiki oder aehnlich auf Quelltext verwiesen
+!!    werden, dann wird eine Sprungmarke (#Bezeichnung) im Quelltext gesetzt
+!!
+!!  Links:
+!!  - http://wzl-vcs/tools/wiki/gt
+!!  - http://wzl-vcs/tools/jenkins/gt
+!!  - http://wzl-vcs/tools/mantis/gt/
+!!  
+! Modulnamen starten mit einem Kuerzel zur Kennzeichnung des Moduls, 
+!   gefolgt von einem Unterstrich und einem Namen
+!> \file GT_FORTRAN_Richtlinie.f90
+MODULE kuerzel_moduleName
+
+! Module alphabetisch angeben
+USE moduleZumEinbinden1
+USE moduleZumEinbinden2
+
+IMPLICIT NONE
+
+PRIVATE
+
+! Funktionen des Moduls
+PUBLIC :: kuerzel_funktion, &
+          weitere_Interfaces
+
+TYPE, PRIVATE :: lokalerDatentyp
+  REAL(KIND=real_normal) :: realVariable
+  INTEGER, DIMENSION(:,:), ALLOCATABLE :: integerFeld
+END TYPE lokalerDatentyp
+
+!> \brief Funktion des Interfaces
+!!
+! Interfaces haben das gleiche Kuerzel wie das Modul
+! Auch ein Interface bei nur einer Subroutine anlegen > Erweiterungen werden einfacher
+INTERFACE kuerzel_funktion
+  MODULE PROCEDURE subroutineName
+END INTERFACE kuerzel_funktion
+
+CONTAINS
+  
+  
+  !> \brief Eine Kurzbeschreibung der Routine...
+  !!  ...maximale zwei Zeilen
+  !!
+  !! \param Beschreibung eingabe1
+  !! \param Beschreibung eingabe2
+  !! \param Beschreibung ausgabe1
+  !! \param Beschreibung ausgabe2
+  !! \param ierr
+  !!
+  SUBROUTINE subroutineName(ausgabe1, ausgabe2, eingabe1, eingabe2, ierr, optionaleEingabe)
+    LOGICAL, INTENT(OUT) :: ausgabe1
+    REAL(KIND=real_normal), INTENT(INOUT) :: ausgabe2
+    CHARACTER(LEN=*), INTENT(IN) :: eingabe1
+    INTEGER, DIMENSION(:), INTENT(IN) :: eingabe2
+    INTEGER, INTENT(IN), OPTIONAL :: optionaleEingabe
+    INTEGER, INTENT(OUT) :: ierr
+
+    TYPE(Vektor4), DIMENSION(:), ALLOCATABLE :: lokaleVariable1
+    INTEGER :: lokaleVariable2, lokaleVariable3
+    
+    ierr = 0
+    
+    ! Programmtext Programmtext Programmtext
+    ! Sehr einfach IF Abfragen kann man auch einzeilig ausfuehren
+    IF (ierr /= 0) RETURN
+    ! Programmtext Programmtext Programmtext
+    CONTAINS
+      
+      ! Auch Subroutinen koennen ein contains beeinhalten
+      FUNCTION inc (i) RESULT(erg)
+        INTEGER, INTENT(IN) :: i
+        INTEGER :: erg
+        erg = i + 1
+      END FUNCTION inc
+  END SUBROUTINE subroutineName
+  
+  !> \brief Funktionen bspw. fuer Berechnungen mit EINEM Ergebnis
+  !!  Da diese Funktion nicht in public gelistet ist, kann sie nur aus dem Modul 
+  !!  aufgerufen werden.
+  !!
+  !! \param Beschreibung eingabe1
+  !! \param Beschreibung eingabe2
+  !! \return Beschreibung des Funktionswertes
+  !!  
+  FUNCTION funktionsName (eingabe1, eingabe2) RESULT(ergebnis)
+    REAL(KIND=real_normal), INTENT(IN) :: eingabe1, eingabe2
+    REAL :: ergebnis
+    
+    INTEGER, DIMENSION(:,:), ALLOCATABLE :: integerFeld
+    INTEGER :: i, fak
+    
+    ALLOCATE(integerFeld(5,2))
+    
+    ! TODO: So markierte Kommentare werden in VisualStudio als Aufgaben gelistet
+    ! Felder mit size zu durchlaufen haben den Vorteil, dass die Groesse immer passt
+    fak = 1
+    DO i = 1, SIZE(integerFeld, 1)
+      fak = fak * i
+    END DO
+    ergebnis  = eingabe1 + eingabe2 + fak
+    
+    IF(ALLOCATED(integerFeld)) DEALLOCATE(integerFeld)
+  END FUNCTION funktionsName 
+
+END MODULE kuerzel_moduleName

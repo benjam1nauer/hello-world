@@ -1,0 +1,58 @@
+# Fortran Programmier Beispiel
+## Motivation
+Diese Anleitung soll dazu dienen, dass allgemein ein leichterer Einstieg in die Programmierung mit Fortran gefunden wird (http://phdcomics.com/comics.php?f=1688). Es wird dabei bewusst auf den Umgang mit den Fortran Bibliotheken der **Getriebeabteilung** verzichtet, allerdings werden ähnliche Sturkturen genutzt.
+Wie auch in den "großen" Bibliotheken gibt es Module und User defined Datatypes und auch die Namen orientieren sich an Namen in den Bibliotheken. Dabei wird in dem vorliegenden Beispiel konsequent auf ein einheitliches Namensschema und englischsprachige Bezeichnungen gesetzt (z.B. `vector4` statt `Vektor4`). Die Richtlinie zum Programmieren ist auch unter `GT_Fortran_Richtline.f90` in diesem Projekt im Ordner *00_Readme* beigelegt.
+
+## Erste Schritte
+Programm auschecken, `FortranExample.vcxproj` starten und auf build in Visual Studio klicken (https://xkcd.com/303/). Alternativ kann man auch die `Erstellen.bat` im Projektordner starten. Sollte es zu einem Fehler kommen, muss in der `set_vars.bat` im Projektordner ein Pfad angepasst werden.  In diesem Fall bitte die Datei `set_vars.bat` im Texteditor öffnen und `${CMAKE_CURRENT_SOURCE_DIR}` durch den Pfad des Programmierbeispiels ersetzen. Dabei auf den Slasch `/` statt des `\` in der Pfadangabe achten. 
+
+## Tipps
+In dem Ordner sind ebenfalls Syntax Highlighting Dateien für *Notepad++* für die Datenformate markdown *.md* und GT Steuerdateien *.ste* zu finden. Diese Können über *Menü > Sprachen > Eigene Sprache definieren ...* in Notepad eingebunden werden.
+Ebenfalls sind in dem Readme Ordner Links zu dem Bugtracker Mantis [1], dem Wiki der GT-Berechnungsgruppe [2] bei Mantis kann man sich mit den WZL Login Details anmelden und anschließend eine Mail mit dem gewünschten Projekt, welches man bearbeiten möchte, an hof schicken. Beim Wiki muss ein neuer Benutzer erstellt werden (VornameNachname). Lesen ist im Wiki ohne Anmeldung möglich. Eine gute Anlaufquelle sind auch immer die gesammelten Mails von hof. Hier kann man sich mal einlesen [3].
+Hilfe zu allen Fortran Befehlen sind unter [5] zu finden.
+[1] http://wzl-vcs/tools/wiki/gt/Fortran/
+[2] http://wzl-vcs/tools/mantis/gt/main_page.php
+[3] http://wzl-vcs/tools/wiki/gt/JensHofschr%C3%B6er/EMails
+[4] https://software.intel.com/en-us/node/691996
+
+Die Datei *SVN-Links.txt* beinhaltet die Startpfade für den Subversion Server. Von da aus kann man sich durchklicken. Die Pfade stehen aber auch zusammengefasst auf [5]
+[5] http://wzl-vcs/tools/wiki/gt/GearToolbox/Quellen
+
+In diesem Beispiel wurden unglaublich viele Kommentare genutzt, da es als Beipiel und gleichzeitig Anleitung dienen soll. Aber denkt immer daran, dass auch jemand anderes euer Programm verstehen soll (http://phdcomics.com/comics.php?f=1689) und nicht zuletzt sollte man es auch selber noch in einem Jahr überblicken(https://xkcd.com/1421/).
+
+Am besten niemals GOTO verwenden. Das versteht einfach keiner mehr und es gibt eigentlich auch keinen praktischen Grund (https://xkcd.com/292/).
+
+Last but not least eine Suche bei Google mit `Fortran Schlüsselwörter auf Englisch` hilft bei 90% der Fragen. Gleiches gilt für andere Programmiersprachen. Und bei den letzten 10% stehen sowohl Festangestellte als auch andere Assistenten gerne zur Verfügung.
+
+## Funktion des Programms
+Um ein möglichst anwendungsnahes Beispiel bereitzustellen, wird in dem vorliegenden Beispiel eine einfache Durchdringungsrechnung durchgeführt. In der Routine `penetration` wird dazu ein eingelesener Punktezug `rigidContour` auf einem zweiten `softContour` abgewälzt und das Ergebnis sowie die Differenzen zwischen den Linienzügen in den jeweiligen Schnitten aka. Spanungsdicken zurückgeliefert. Es ist denkbar und einfach möglich dieses Prgramm zu einer kompletten 3D Durchdringungsrechnung zu erweitern. Um das Beispiel anschaulich zu halten soll dies aber nicht teil der Beispiels sein und kann als Einstieg in die Programmierung gesehen werden. Im Kapitel [Erweiterungen und Ausblick](#Ausblick) werden Ansätze zur Erweiterung auf eine vollständige 3D Durchdringungsrechnung vorgestellt. Die resultierende Werkstückstruktur kann über die im `00_Workdir`liegende `plotPoints.m` matlab Datei geplottet werden.
+
+## Struktur
+Das Programm liest als erstes die Steuerdatei ein. Diese besitzt die gleiche Syntax wie die Steuerdateien der **WZL Gear Toolbox** und nutzt die gleichen Kenner,allerdings nur einen kleinen Bruchteil des gesamten Umfangs.
+Anschließend wird die mittels der `simulationControl` der Ablauf im Prgramm festgelegt. Aktuell gibt es nur einen definierten Prozess mit der Prozessnummer `*#### = 2` welcher das Einlesen einer Werkstück und einer Werkzeugkontur beinhaltet und anschließend diese in einem wälzenden Prozess zum Schnitt bringt. Dazu werden keine Berechnungen von Werkstück oder Werkzeugdaten durchgeführt. Mögliche Z-Werte des Werkstücks wie auch des Werkzeugs werden ignoriert; Die eingelesenen Linienzüge werden wie im *Stirnschnitt* von Verzahnungen genutzt.
+Zusätzlich ist es möglich über den Prozess `*#### = 1` (equivalent ist kein Kenner) zu wählen und eine eigenen Kinematik in Form einer Tabelle, welche mittels `*3000` übergeben wird, in der Steuerdatei vorzugeben.
+
+### Datenstrukturen
+`Datatypes` enthält einige Konstanten, welche anschließend an verschiedenen Stellen genutzt werden. Hierzu zählen beispielweise die Standard Feldlänge von `CHARACTER` Arrays oder auch der Wert `pi`.
+
+`Vector` beinhaltet die Datenstruktur sowie die Rechenoperationen eines 4 dimensionalen Vektors. Hier kann der Umgang mit Operatorenüberladung gelernt werden.
+
+### Einleseroutinen
+In `STE_file` werden sämtliche Funktionen zusammengefasst, welche benötigt werden um die Werte aus der Steuerdatei zu lesen. Dabei greift `STE_file` oft auf Funktionen aus `fIO_file` zurück. Dieses Modul stellt grundlegende Funktionen zum Umgang mit Dateien bereit. Sollte man ein Beispiel für das Lesen und Schreiben von Textdateien benötigen kann man sich hier etwas suchen. Auch gibt es hier ein Beispiel für eine rekursive Funktion.
+
+### Kinematik
+Die Kinematik wird durch das Modul `KIN_kinematics` zur Verfügung gestellt. Dabei ist der grundlegende Aufbau identisch zu der Kinematik in der **WZL Gear Toolbox**, wenn auch nicht identisch vom Umfang. Es ist möglich sowohl konstante Transformationen wie auch linear und quadratisch von der Zeit abhängige Transformationen abzubilden. Für den einfachen Fall des Abwälzens ist dies implementiert. Dabei wird mithilfe der Subroutine `KIN_addMovement` eine Bewegung der Kinematik angehangen. Dabei kann der Routine zum einen die Art der Bewegung (2. Parameter), als auch der Wert für eine konstante (3. Parameter), zeitlich linear (4. Parameter) und quadratisch (5. Parameter) abhängige Bewegung übergeben werden. Zusätzlich ermöglicht es der letzte, optionale Parameter eine bestimmte Bewegung zu überschreiben. Zusätzlich ist es notwendig mit der Routine `KIN_setupKinematics` den Startzeitpunkt einer Bewegung, das Ende und das Simulationsinkrement festzulegen.
+
+### Durchdringungsrechnung
+`CC_ContourCalculation` beeinhaltet eine einfache Durchdringungsrechnung. In der **WZL Gear Toolbox** ist eine deutlich umfangreichere Methode hinterlegt.
+
+## <a name="Ausblick"></a> Erweiterungen und Ausblick
+Um die Simualtion auf eine 3D Durchdringungsrechnung zu erweitern, müssen zum einen Hüllkörper für das Werkstück und Werkzeug gebildet werden und zum anderen eine Iteration der Durchdringungsrechnung über die einzelnen Schnittebenen des Werkstücks. Hierzu würde es sich anbieten die Datenstruktur der `line4` um eine weitere Dimension zu ergänzen. Beispielsweise einen Datentyp `surface4` welcher ein Feld von `line4` beinhaltet. Zusätzlich ist es hier erfoderlich, dass der Schnitt des Hüllkörpers in den einzelnen Strinschnittebenen des Werkstücks berechnet wird. Dazu kann man sich im Toolbox Programm SPARTApro (svn http://wzl-vcs/svn/gt/prox/sparta/pro/spartakus/trunk) die Bibliotheksroutine `CreateWZGSchnitt` angucken.
+Anschließend könnte man Simulationsschritte zum Erstellen oder Einlesen der Hüllkörper in das Hauptprogram hinzufügen und in der Simmulationssteuerung verknüpfen.
+
+## TODO und bekannte Bugs
+* Readme erweitern
+* Normalen der Schnittpunkte sind noch nicht korrekt
+* Whiskey kaufen https://xkcd.com/323/
+* ...
+

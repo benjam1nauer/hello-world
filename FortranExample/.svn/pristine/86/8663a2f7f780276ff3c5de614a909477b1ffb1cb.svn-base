@@ -1,0 +1,13 @@
+clear; clc; clf;
+
+hold('on'); grid('on'); axis('equal', 'square', 'vis3d');
+xlabel('X-Achse'); ylabel('Y-Achse'); zlabel('Z-Achse');
+figure(gcf);
+
+% t = importdata('tool_0.txt');
+% plot3(t(:,1),t(:,2),t(:,3), 'b', 'MarkerSize',3);
+% quiver3(t(:,1),t(:,2),t(:,3),t(:,4),t(:,5),t(:,6), 'b', 'MarkerSize',3);
+
+g = importdata('gear_end.txt');
+plot3(g(:,1),g(:,2),g(:,3), 'k', 'MarkerSize',3);
+quiver3(g(:,1),g(:,2),g(:,3),g(:,4),g(:,5),g(:,6), 'k', 'MarkerSize',3);
