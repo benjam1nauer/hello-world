@@ -5,6 +5,5 @@ Das ist ein Test ob ich diesen Text auch online anzeigen kann. #12:00
 Eine Aenerung im "erster_branch" branch
 
 Eine Änderung im "unter_branch" branch, welcher ein "Snapshot" des "erster_branch" branches sein sollte.
-Eine letzte Änderung um sich die Änderungshistorie anzusehen
 
-Eine Änderung im develop Branch um im Tutorial weiter machen zu können
+Eine letzte Änderung um sich die Änderungshistorie anzusehen
